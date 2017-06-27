@@ -35,7 +35,9 @@ except IndexError:
 try:
     codename = sys.argv[2]
 except IndexError:
-    codename = 'Siesta-4.0@rinaldo'
+    print >> sys.stderr, ("Please provide siesta code as second parameter."
+                          "To see available codes type \"verdi code list\".")
+    sys.exit(1)
 
 # If True, load the pseudos from the family specified below
 # Otherwise, use static files provided
@@ -130,7 +132,6 @@ if auto_pseudos:
 
     try:
         pseudo_family = sys.argv[3]
-        # pseudo_family = 'test_psf_family'
     except IndexError:
         print >> sys.stderr, "Error, auto_pseudos set to True. You therefore need to pass as second parameter"
         print >> sys.stderr, "the pseudo family name."

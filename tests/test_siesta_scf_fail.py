@@ -4,7 +4,19 @@
 __copyright__ = u"Copyright (c), 2015, ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE (Theory and Simulation of Materials (THEOS) and National Centre for Computational Design and Discovery of Novel Materials (NCCR MARVEL)), Switzerland and ROBERT BOSCH LLC, USA. All rights reserved."
 __license__ = "MIT license, see LICENSE.txt file"
 __version__ = "0.7.0"
-__contributors__ = "Andrea Cepellotti, Victor Garcia-Suarez, Alberto Garcia"
+__contributors__ = "Andrea Cepellotti, Victor Garcia-Suarez, Alberto Garcia, Emanuele Bosoni"
+
+#
+# This is an example of a calculation that will end in a FAILED state due
+# to lack of scf convergence in the allotted number of iterations.
+# To restart, either in a verdi shell or via a script, do:
+#
+# c = load_node(PK)
+# c2 = c.create_restart(force_restart=True)
+# c2.store_all()
+# c2.submit()
+#
+# (You can use the 'test_siesta_restart.py' script)
 
 import sys
 import os
@@ -86,19 +98,24 @@ if auto_pseudos:
         sys.exit(1)
 
 parameters = ParameterData(dict={
-                'xc-functional': 'LDA',
-                'xc-authors': 'CA',
-                'max-scfiterations': 50,
-                'dm-numberpulay': 4,
-                'dm-mixingweight': 0.3,
-                'dm-tolerance': 1.e-3,
+                'xc:functional': 'LDA',
+                'xc:authors': 'CA',
+                'spinpolarized': True,
+                'meshcutoff': '40.000 Ry',
+                'dm:numberpulay': 4,
+                'dm:mixingweight': 0.3,
+                'dm:tolerance': 1.e-3,
+                'max-scfiterations': 3,
+                'scf-must-converge': True,
                 'Solution-method': 'diagon',
                 'electronic-temperature': '25 meV',
                 'md-typeofrun': 'cg',
-                'md-numcgsteps': 3,
+                'md-numcgsteps': 0,
                 'md-maxcgdispl': '0.1 Ang',
                 'md-maxforcetol': '0.04 eV/Ang',
-                'xml-write': True
+                'writeforces': True,
+                'writecoorstep': True,
+                'xml:write': True
                 })
 
 basis = ParameterData(dict={
@@ -113,13 +130,28 @@ kpoints = KpointsData()
 kpoints_mesh = 4
 kpoints.set_kpoints_mesh([kpoints_mesh,kpoints_mesh,kpoints_mesh])
 
-calc = code.new_calc()
-calc.label = "Si bulk"
-calc.description = "Test calculation with the Siesta code. Si bulk"
-calc.set_max_wallclock_seconds(30*60) # 30 min
 
-#------------ clarify this
-calc.set_resources({"num_machines": 1, "num_mpiprocs_per_machine": 1})
+# (the object settings is optional)
+settings_dict={'test_key': 'test_value'}
+settings = ParameterData(dict=settings_dict)
+
+calc = code.new_calc()
+calc.label = "Si_bulk"
+calc.description = "Siesta scf non-convergence test"
+calc.set_max_wallclock_seconds(100) 
+
+calc.set_resources({"num_machines": 1})
+code_mpi_enabled =  False
+try:
+    code_mpi_enabled =  code.get_extra("mpi")
+except AttributeError:
+    pass
+calc.set_withmpi(code_mpi_enabled)
+
+#calc.set_custom_scheduler_commands("#SBATCH --account=ch3")
+
+if queue is not None:
+    calc.set_queue_name(queue)
 
 calc.use_structure(s)
 calc.use_parameters(parameters)
@@ -144,11 +176,22 @@ else:
         print "Created the pseudo for {}".format(kinds)
       else:
         print "Using the pseudo for {} from DB: {}".format(kinds,pseudo.pk)
-
+        
       # Attach pseudo node to the calculation
       calc.use_pseudo(pseudo,kind=kinds)
 
 calc.use_kpoints(kpoints)
+
+# K-points for bands
+# NOTE: bandskpoints.set_cell(s.cell, s.pbc) HAS TO BE SET ALWAYS ###
+bandskpoints = KpointsData()
+
+##..kp path automatically generated from structure (all high-simmetry point)..##
+##.....labels automatically included, 0.05 is the distance between kpoints....##
+bandskpoints.set_cell(s.cell, s.pbc)
+bandskpoints.set_kpoints_path(kpoint_distance = 0.05)
+
+calc.use_bandskpoints(bandskpoints)
 
 if settings is not None:
     calc.use_settings(settings)
