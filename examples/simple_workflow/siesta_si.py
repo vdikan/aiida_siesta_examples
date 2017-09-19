@@ -4,7 +4,7 @@
 import os, sys
 from aiida.common.example_helpers import test_and_get_code
 
-PsfData = DataFactory('psf')
+PsfData = DataFactory('siesta.psf')
 StructureData = DataFactory('structure')
 ParameterData = DataFactory('parameter')
 KpointsData = DataFactory('array.kpoints')
@@ -12,12 +12,13 @@ KpointsData = DataFactory('array.kpoints')
 ###############################
 # Set your values here
 # codename = 'siesta_neu@neurotoxin'
-codename = 'siesta_icn2work@icn2work'
+# codename = 'siesta_icn2work@icn2work'
+codename = 'siesta-m@neu'
 # pseudo_family = 'testf'
 ###############################
 
 # code = Code.get_from_string(codename)
-code = test_and_get_code(codename,  expected_code_type='siesta')
+code = test_and_get_code(codename,  expected_code_type='siesta.siesta')
 
 # Si diamond structure
 alat = 5.430 # angstrom

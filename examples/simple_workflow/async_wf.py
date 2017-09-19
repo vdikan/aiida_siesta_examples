@@ -24,7 +24,7 @@ KpointsData = DataFactory('array.kpoints')
 # labels = ["c1", "c2"]
 scale_facs = (0.96, 0.98, 0.99, 1.0, 1.01, 1.02, 1.04)
 labels = ["c1", "c2", "c3", "c4", "c5", "c6", "c7"]
-codename = 'siesta_neu@neurotoxin'
+codename = 'siesta-m@neu'
 # codename = 'siesta_icn2work@icn2work'
 ###############################
 
