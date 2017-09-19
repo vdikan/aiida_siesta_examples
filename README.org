@@ -1,0 +1,5 @@
+* AiiDA-Siesta Tutorial
+
+  This repository contains implementation of [[http://personales.unican.es/junqueraj/][Javier Junquera]]'s hands-on session
+  on [[http://personales.unican.es/junqueraj/JavierJunquera_files/Metodos/Structuralproperties/Structural.html][computations of structural and electronic properties of materials]]
+  in a form of workfunctions for [[http://www.aiida.net/][AiiDA computational framework]].
